@@ -12,17 +12,17 @@ INSERT INTO tipo_cliente (codigo, descripcion) VALUES
 ('ESTUDIANTE', 'Cliente Estudiante - Descuentos especiales para estudiantes');
 
 -- Insertar clientes con datos aleatorios (10 registros)
-INSERT INTO cliente (nombre, apellido, edad, email, cod_tipo_cliente) VALUES
-('María', 'González', 28, 'maria.gonzalez@email.com', 'VIP'),
-('Carlos', 'Rodríguez', 35, 'carlos.rodriguez@empresa.com', 'CORPORATIVO'),
-('Ana', 'López', 22, 'ana.lopez@estudiante.edu', 'ESTUDIANTE'),
-('Miguel', 'Fernández', 42, 'miguel.fernandez@gmail.com', 'REGULAR'),
-('Laura', 'Martínez', 31, 'laura.martinez@hotmail.com', 'VIP'),
-('Diego', 'Sánchez', 26, 'diego.sanchez@yahoo.com', 'NUEVO'),
-('Carmen', 'Ruiz', 39, 'carmen.ruiz@outlook.com', 'REGULAR'),
-('Antonio', 'Morales', 45, 'antonio.morales@corporativo.com', 'CORPORATIVO'),
-('Elena', 'Jiménez', 20, 'elena.jimenez@universidad.edu', 'ESTUDIANTE'),
-('Roberto', 'Torres', 33, 'roberto.torres@ejemplo.com', 'REGULAR');
+INSERT INTO cliente (rut, nombre, apellido, edad, email, cod_tipo_cliente) VALUES
+('12345678-9', 'María', 'González', 28, 'maria.gonzalez@email.com', 'VIP'),
+('23456789-0', 'Carlos', 'Rodríguez', 35, 'carlos.rodriguez@empresa.com', 'CORPORATIVO'),
+('34567890-1', 'Ana', 'López', 22, 'ana.lopez@estudiante.edu', 'ESTUDIANTE'),
+('45678901-2', 'Miguel', 'Fernández', 42, 'miguel.fernandez@gmail.com', 'REGULAR'),
+('56789012-3', 'Laura', 'Martínez', 31, 'laura.martinez@hotmail.com', 'VIP'),
+('67890123-4', 'Diego', 'Sánchez', 26, 'diego.sanchez@yahoo.com', 'NUEVO'),
+('78901234-5', 'Carmen', 'Ruiz', 39, 'carmen.ruiz@outlook.com', 'REGULAR'),
+('89012345-6', 'Antonio', 'Morales', 45, 'antonio.morales@corporativo.com', 'CORPORATIVO'),
+('90123456-7', 'Elena', 'Jiménez', 20, 'elena.jimenez@universidad.edu', 'ESTUDIANTE'),
+('01234567-8', 'Roberto', 'Torres', 33, 'roberto.torres@ejemplo.com', 'REGULAR');
 
 -- Verificar los datos insertados
 SELECT 'Tipos de Cliente insertados:' as info;

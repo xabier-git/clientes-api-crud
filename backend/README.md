@@ -1,16 +1,19 @@
 # API de Gestión de Clientes
 
-Una API REST completa para la gestión de clientes desarrollada con Spring Boot, JPA/Hibernate y MySQL.
+Una API REST CRUD completa para la gestión de clientes desarrollada con Spring Boot, JPA/Hibernate, MySQL y Lombok.
 
 ## Características
 
 - **CRUD completo** para clientes y tipos de cliente
+- **Relaciones JPA** con foreign keys entre Cliente y TipoCliente
+- **Búsqueda por RUT** como identificador único secundario
 - **Validaciones de datos** con Bean Validation
-- **Relaciones JPA** entre entidades
-- **Paginación y filtros** en las consultas
+- **Solo JSON** en requests y responses
 - **Documentación API** con Swagger/OpenAPI 3
+- **Lombok** para reducir código boilerplate
+- **Índices optimizados** para búsquedas por RUT
 - **Manejo de errores** centralizado
-- **Base de datos MySQL** con índices optimizados
+- **Docker MySQL** con datos de ejemplo
 
 ## Tecnologías Utilizadas
 
@@ -18,48 +21,66 @@ Una API REST completa para la gestión de clientes desarrollada con Spring Boot,
 - **Spring Boot 3.1.0**
 - **Spring Data JPA**
 - **Hibernate**
-- **MySQL 8.0+**
+- **MySQL 8.0+ (Docker)**
+- **Lombok**
 - **Swagger/OpenAPI 3**
 - **Maven**
 
-## Estructura del Proyecto
+## Modelo de Datos
 
+### TipoCliente (Catálogo)
+- `codigo` (String, PK): Código único del tipo (VIP, REG, CORP, etc.)
+- `descripcion` (String): Descripción del tipo de cliente
+
+### Cliente
+- `id` (Long, PK): ID autoincremental
+- `rut` (String, Unique): RUT único del cliente (índice principal)
+- `nombre` (String): Nombre del cliente
+- `apellido` (String): Apellido del cliente
+- `edad` (Integer): Edad del cliente
+- `email` (String, Unique): Email único
+- `codTipoCliente` (String, FK): Código del tipo de cliente
+- `tipoCliente` (TipoCliente): Relación @ManyToOne con TipoCliente
+
+### Relaciones
+- **Cliente** → **TipoCliente**: Relación Many-to-One con foreign key
+
+## Configuración Rápida con Docker
+
+### 1. Ejecutar MySQL con Docker
+
+```bash
+# Crear y ejecutar contenedor MySQL
+docker run --name mysql-clientes-api \
+  -e MYSQL_ROOT_PASSWORD= \
+  -e MYSQL_DATABASE=clientes_db \
+  -p 3306:3306 -d mysql:8.0
+
+# Verificar que esté ejecutándose
+docker ps
 ```
-src/
-├── main/
-│   ├── java/com/example/clientesapi/
-│   │   ├── controller/          # Controladores REST
-│   │   ├── service/             # Lógica de negocio
-│   │   ├── repository/          # Acceso a datos (JPA)
-│   │   ├── entity/              # Entidades JPA
-│   │   ├── dto/                 # DTOs para transferencia de datos
-│   │   ├── mapper/              # Mapeo entre entidades y DTOs
-│   │   ├── exception/           # Manejo de excepciones
-│   │   ├── config/              # Configuraciones
-│   │   └── ClientesApiApplication.java
-│   └── resources/
-│       ├── db/                  # Scripts de base de datos
-│       └── application.properties
-└── test/                        # Tests unitarios e integración
+
+### 2. Configurar la base de datos
+
+**Opción A: Script completo (recomendado)**
+```bash
+docker exec -i mysql-clientes-api mysql -uroot clientes_db < src/main/resources/db/setup-complete.sql
 ```
 
-## Configuración de Base de Datos
-
-### 1. Crear la base de datos
-
-```sql
--- Ejecutar el script completo
-mysql -u root -p < src/main/resources/db/setup-complete.sql
+**Opción B: Setup básico**
+```bash
+docker exec -i mysql-clientes-api mysql -uroot clientes_db < src/main/resources/db/simple-setup.sql
 ```
 
-### 2. Configurar conexión
+### 3. Configurar aplicación
 
-Editar `application.properties`:
+Verificar `application.properties` (ya configurado):
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/clientes_db
+spring.datasource.url=jdbc:mysql://localhost:3306/clientes_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 spring.datasource.username=root
-spring.datasource.password=tu_password
+spring.datasource.password=
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 ```
 
 ## Ejecutar la Aplicación
@@ -68,24 +89,35 @@ spring.datasource.password=tu_password
 
 - JDK 17+
 - Maven 3.6+
-- MySQL 8.0+
+- Docker (para MySQL)
 
 ### Comandos
 
+**Setup automático (recomendado):**
 ```bash
-# Compilar el proyecto
-mvn clean compile
-
-# Ejecutar tests
-mvn test
-
-# Ejecutar la aplicación
-mvn spring-boot:run
-
-# Crear JAR ejecutable
-mvn clean package
-java -jar target/clientes-api-0.0.1-SNAPSHOT.jar
+# Setup completo automático con Docker
+./quick-setup.sh
 ```
+
+**Setup manual:**
+```bash
+# Hacer ejecutable el script
+chmod +x run.sh
+
+# Ejecutar con script interactivo
+./run.sh
+
+# O manualmente:
+mvn clean compile
+mvn spring-boot:run
+```
+
+## Scripts Disponibles
+
+- **`quick-setup.sh`**: Setup automático completo con Docker MySQL
+- **`run.sh`**: Script interactivo con opciones Docker/manual  
+- **`setup-complete.sql`**: Script SQL completo con datos de ejemplo
+- **`simple-setup.sql`**: Script SQL básico con datos mínimos
 
 ## Documentación de la API
 
@@ -94,38 +126,49 @@ Una vez ejecutada la aplicación, la documentación estará disponible en:
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
 - **OpenAPI JSON**: http://localhost:8080/api-docs
 
-## Endpoints Principales
+## Endpoints API
 
-### Tipos de Cliente
-
-- `GET /api/tipos-cliente` - Listar todos los tipos
-- `GET /api/tipos-cliente/{codigo}` - Obtener por código
-- `POST /api/tipos-cliente` - Crear nuevo tipo
-- `PUT /api/tipos-cliente/{codigo}` - Actualizar tipo
-- `DELETE /api/tipos-cliente/{codigo}` - Eliminar tipo
+Todos los endpoints solo aceptan y retornan JSON (`application/json`):
 
 ### Clientes
 
 - `GET /api/clientes` - Listar todos los clientes
-- `GET /api/clientes/search` - Buscar con filtros y paginación
-- `GET /api/clientes/{id}` - Obtener por ID
-- `GET /api/clientes/email/{email}` - Obtener por email
-- `GET /api/clientes/tipo/{codigo}` - Obtener por tipo
+- `GET /api/clientes/{id}` - Obtener cliente por ID
+- `GET /api/clientes/rut/{rut}` - Obtener cliente por RUT
 - `POST /api/clientes` - Crear nuevo cliente
 - `PUT /api/clientes/{id}` - Actualizar cliente
 - `DELETE /api/clientes/{id}` - Eliminar cliente
 
+### Tipos de Cliente
+
+- `GET /api/tipos-cliente` - Listar todos los tipos
+- `GET /api/tipos-cliente/{codigo}` - Obtener tipo por código
+- `POST /api/tipos-cliente` - Crear nuevo tipo
+- `PUT /api/tipos-cliente/{codigo}` - Actualizar tipo
+- `DELETE /api/tipos-cliente/{codigo}` - Eliminar tipo
+
+## Datos de Ejemplo
+
+El sistema viene con datos precargados:
+
+### Tipos de Cliente:
+- **VIP**: Cliente VIP - Servicio premium con beneficios especiales
+- **REG**: Cliente Regular - Servicio estándar
+- **NEW**: Cliente Nuevo - Recién registrado en el sistema
+- **CORP**: Cliente Corporativo - Empresa o entidad jurídica
+- **EST**: Cliente Estudiante - Descuentos especiales para estudiantes
+- **SEN**: Cliente Senior - Descuentos para adultos mayores
+- **PREM**: Cliente Premium - Servicios exclusivos
+
+### Clientes:
+10+ clientes de ejemplo con diferentes tipos
+
 ## Ejemplos de Uso
 
-### Crear un Tipo de Cliente
+### Listar Tipos de Cliente
 
 ```bash
-curl -X POST http://localhost:8080/api/tipos-cliente \
-  -H "Content-Type: application/json" \
-  -d '{
-    "codigo": "GOLD",
-    "descripcion": "Cliente Gold - Beneficios premium"
-  }'
+curl http://localhost:8080/api/tipos-cliente
 ```
 
 ### Crear un Cliente
@@ -134,6 +177,7 @@ curl -X POST http://localhost:8080/api/tipos-cliente \
 curl -X POST http://localhost:8080/api/clientes \
   -H "Content-Type: application/json" \
   -d '{
+    "rut": "99888777-6",
     "nombre": "Juan",
     "apellido": "Pérez",
     "edad": 30,
@@ -142,41 +186,96 @@ curl -X POST http://localhost:8080/api/clientes \
   }'
 ```
 
-### Buscar Clientes con Filtros
+### Obtener Cliente por RUT
 
 ```bash
-curl "http://localhost:8080/api/clientes/search?nombre=Juan&page=0&size=10&sortBy=apellido&sortDir=asc"
+curl http://localhost:8080/api/clientes/rut/12345678-9
 ```
 
-## Modelo de Datos
+### Crear Tipo de Cliente
 
-### TipoCliente
-- `codigo` (String, PK): Código único del tipo
-- `descripcion` (String): Descripción del tipo
+```bash
+curl -X POST http://localhost:8080/api/tipos-cliente \
+  -H "Content-Type: application/json" \
+  -d '{
+    "codigo": "GOLD",
+    "descripcion": "Cliente Gold - Membresía dorada"
+  }'
+```
 
-### Cliente
-- `id` (Long, PK): ID autoincremental
-- `nombre` (String): Nombre del cliente
-- `apellido` (String): Apellido del cliente
-- `edad` (Integer): Edad del cliente
-- `email` (String, Unique): Email único
-- `codTipoCliente` (String, FK): Referencia a TipoCliente
+### Actualizar un Cliente
+
+```bash
+curl -X PUT http://localhost:8080/api/clientes/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rut": "12345678-9",
+    "nombre": "Juan Carlos",
+    "apellido": "Pérez",
+    "edad": 31,
+    "email": "juan.perez@email.com",
+    "codTipoCliente": "PREM"
+  }'
+```
+
+### Eliminar un Cliente
+
+```bash
+curl -X DELETE http://localhost:8080/api/clientes/1
+```
 
 ## Validaciones
 
-- Email debe tener formato válido y ser único
-- Nombre y apellido son obligatorios
-- Edad debe estar entre 0 y 150 años
-- Código de tipo cliente debe existir
+- **RUT** debe ser único y obligatorio
+- **Email** debe tener formato válido y ser único
+- **Nombre y apellido** son obligatorios
+- **Edad** debe estar entre 0 y 150 años
+- **Código de tipo cliente** es obligatorio y debe existir en tipo_cliente
+- **Código de tipo** debe ser único (máximo 10 caracteres)
 
 ## Características Técnicas
 
-- **Índices de base de datos** para optimizar consultas
-- **Paginación** automática con Spring Data
-- **Filtros dinámicos** en búsquedas
-- **Validación de datos** con anotaciones
+- **Índice principal por RUT** para búsquedas optimizadas
+- **Lombok** para getters, setters y constructores automáticos
+- **Solo JSON** en todas las comunicaciones
+- **Validación de datos** con anotaciones Bean Validation
 - **Manejo de errores** centralizado con ResponseEntity
 - **Documentación automática** con Swagger
+- **Relaciones JPA** con foreign keys entre entidades
+- **Base de datos dockerizada** para fácil setup
+
+## Estructura del Proyecto
+
+```
+src/
+├── main/
+│   ├── java/com/example/clientesapi/
+│   │   ├── controller/          # API REST Controllers
+│   │   │   ├── ClienteController.java
+│   │   │   └── TipoClienteController.java
+│   │   ├── service/             # Lógica de negocio
+│   │   │   ├── ClienteService.java
+│   │   │   └── TipoClienteService.java
+│   │   ├── repository/          # Acceso a datos JPA
+│   │   │   ├── ClienteRepository.java
+│   │   │   └── TipoClienteRepository.java
+│   │   ├── entity/              # Entidades JPA con Lombok
+│   │   │   ├── Cliente.java
+│   │   │   └── TipoCliente.java
+│   │   ├── dto/                 # DTOs con Lombok
+│   │   │   ├── ClienteDTO.java
+│   │   │   └── TipoClienteDTO.java
+│   │   ├── exception/           # Manejo de excepciones
+│   │   ├── config/              # OpenApiConfig - Configuración Swagger
+│   │   └── ClientesApiApplication.java
+│   └── resources/
+│       ├── db/                  # Scripts de base de datos
+│       │   ├── setup-complete.sql
+│       │   ├── schema.sql
+│       │   └── data.sql
+│       └── application.properties
+└── test/                        # Tests unitarios e integración
+```
 
 ## Desarrollo
 

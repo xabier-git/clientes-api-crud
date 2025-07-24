@@ -11,11 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,8 +26,8 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
     
-    @GetMapping
-    @Operation(summary = "Obtener todos los clientes", 
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Listar todos los clientes", 
                description = "Retorna una lista de todos los clientes del sistema")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista de clientes obtenida exitosamente",
@@ -42,41 +39,7 @@ public class ClienteController {
         return ResponseEntity.ok(clientes);
     }
     
-    @GetMapping("/search")
-    @Operation(summary = "Buscar clientes con filtros y paginación", 
-               description = "Busca clientes aplicando filtros opcionales y paginación")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Búsqueda realizada exitosamente",
-                    content = @Content(mediaType = "application/json"))
-    })
-    public ResponseEntity<Page<ClienteDTO>> searchClientes(
-            @Parameter(description = "Filtro por nombre (búsqueda parcial)")
-            @RequestParam(required = false) String nombre,
-            @Parameter(description = "Filtro por apellido (búsqueda parcial)")
-            @RequestParam(required = false) String apellido,
-            @Parameter(description = "Filtro por email (búsqueda parcial)")
-            @RequestParam(required = false) String email,
-            @Parameter(description = "Filtro por código de tipo de cliente (búsqueda exacta)")
-            @RequestParam(required = false) String codTipoCliente,
-            @Parameter(description = "Número de página (empezando desde 0)")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Tamaño de página")
-            @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "Campo por el cual ordenar")
-            @RequestParam(defaultValue = "id") String sortBy,
-            @Parameter(description = "Dirección del ordenamiento (asc/desc)")
-            @RequestParam(defaultValue = "asc") String sortDir) {
-        
-        Sort sort = sortDir.equalsIgnoreCase("desc") ? 
-                    Sort.by(sortBy).descending() : 
-                    Sort.by(sortBy).ascending();
-        
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<ClienteDTO> clientesPage = clienteService.findByFilters(nombre, apellido, email, codTipoCliente, pageable);
-        return ResponseEntity.ok(clientesPage);
-    }
-    
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Obtener cliente por ID", 
                description = "Retorna un cliente específico basado en su ID")
     @ApiResponses(value = {
@@ -92,38 +55,23 @@ public class ClienteController {
         return ResponseEntity.ok(cliente);
     }
     
-    @GetMapping("/email/{email}")
-    @Operation(summary = "Obtener cliente por email", 
-               description = "Retorna un cliente específico basado en su email")
+    @GetMapping(value = "/rut/{rut}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Obtener cliente por RUT", 
+               description = "Retorna un cliente específico basado en su RUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Cliente encontrado",
                     content = @Content(mediaType = "application/json", 
                                      schema = @Schema(implementation = ClienteDTO.class))),
         @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
     })
-    public ResponseEntity<ClienteDTO> getClienteByEmail(
-            @Parameter(description = "Email del cliente", required = true)
-            @PathVariable String email) {
-        ClienteDTO cliente = clienteService.findByEmail(email);
+    public ResponseEntity<ClienteDTO> getClienteByRut(
+            @Parameter(description = "RUT del cliente", required = true)
+            @PathVariable String rut) {
+        ClienteDTO cliente = clienteService.findByRut(rut);
         return ResponseEntity.ok(cliente);
     }
     
-    @GetMapping("/tipo/{codTipoCliente}")
-    @Operation(summary = "Obtener clientes por tipo", 
-               description = "Retorna todos los clientes de un tipo específico")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Lista de clientes obtenida exitosamente",
-                    content = @Content(mediaType = "application/json", 
-                                     schema = @Schema(implementation = ClienteDTO.class)))
-    })
-    public ResponseEntity<List<ClienteDTO>> getClientesByTipo(
-            @Parameter(description = "Código del tipo de cliente", required = true)
-            @PathVariable String codTipoCliente) {
-        List<ClienteDTO> clientes = clienteService.findByTipoCliente(codTipoCliente);
-        return ResponseEntity.ok(clientes);
-    }
-    
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Crear nuevo cliente", 
                description = "Crea un nuevo cliente en el sistema")
     @ApiResponses(value = {
@@ -131,7 +79,7 @@ public class ClienteController {
                     content = @Content(mediaType = "application/json", 
                                      schema = @Schema(implementation = ClienteDTO.class))),
         @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
-        @ApiResponse(responseCode = "409", description = "Ya existe un cliente con ese email")
+        @ApiResponse(responseCode = "409", description = "Ya existe un cliente con ese RUT o email")
     })
     public ResponseEntity<ClienteDTO> createCliente(
             @Parameter(description = "Datos del cliente a crear", required = true)
@@ -140,7 +88,7 @@ public class ClienteController {
         return new ResponseEntity<>(createdCliente, HttpStatus.CREATED);
     }
     
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Actualizar cliente", 
                description = "Actualiza los datos de un cliente existente")
     @ApiResponses(value = {
@@ -149,7 +97,7 @@ public class ClienteController {
                                      schema = @Schema(implementation = ClienteDTO.class))),
         @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
         @ApiResponse(responseCode = "404", description = "Cliente no encontrado"),
-        @ApiResponse(responseCode = "409", description = "Ya existe otro cliente con ese email")
+        @ApiResponse(responseCode = "409", description = "Ya existe otro cliente con ese RUT o email")
     })
     public ResponseEntity<ClienteDTO> updateCliente(
             @Parameter(description = "ID único del cliente", required = true)
