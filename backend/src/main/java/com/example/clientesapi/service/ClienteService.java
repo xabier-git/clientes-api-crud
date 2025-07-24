@@ -5,6 +5,7 @@ import com.example.clientesapi.entity.Cliente;
 import com.example.clientesapi.exception.ResourceNotFoundException;
 import com.example.clientesapi.exception.DuplicateResourceException;
 import com.example.clientesapi.repository.ClienteRepository;
+import com.example.clientesapi.repository.TipoClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,9 @@ public class ClienteService {
     
     @Autowired
     private ClienteRepository clienteRepository;
+    
+    @Autowired
+    private TipoClienteRepository tipoClienteRepository;
     
     @Transactional(readOnly = true)
     public List<ClienteDTO> findAll() {
@@ -52,6 +56,11 @@ public class ClienteService {
             throw new DuplicateResourceException("Ya existe un cliente con email: " + clienteDTO.getEmail());
         }
         
+        // 🎯 NUEVA VALIDACIÓN: Verificar que el código de tipo cliente exista
+        if (!tipoClienteRepository.existsById(clienteDTO.getCodTipoCliente())) {
+            throw new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + clienteDTO.getCodTipoCliente());
+        }
+        
         Cliente cliente = toEntity(clienteDTO);
         Cliente savedCliente = clienteRepository.save(cliente);
         return toDTO(savedCliente);
@@ -69,6 +78,11 @@ public class ClienteService {
         // Validar que el email no exista en otro cliente
         if (clienteRepository.existsByEmailAndIdNot(clienteDTO.getEmail(), id)) {
             throw new DuplicateResourceException("Ya existe otro cliente con email: " + clienteDTO.getEmail());
+        }
+        
+        // 🎯 NUEVA VALIDACIÓN: Verificar que el código de tipo cliente exista
+        if (!tipoClienteRepository.existsById(clienteDTO.getCodTipoCliente())) {
+            throw new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + clienteDTO.getCodTipoCliente());
         }
         
         updateEntityFromDTO(clienteDTO, existingCliente);
