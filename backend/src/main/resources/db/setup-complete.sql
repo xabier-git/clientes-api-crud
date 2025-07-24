@@ -33,36 +33,49 @@ COMMENT='Catálogo de tipos de cliente';
 -- Tabla cliente
 CREATE TABLE cliente (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID único del cliente',
+    rut VARCHAR(12) NOT NULL UNIQUE COMMENT 'RUT único del cliente',
     nombre VARCHAR(50) NOT NULL COMMENT 'Nombre del cliente',
     apellido VARCHAR(50) NOT NULL COMMENT 'Apellido del cliente',
     edad INT COMMENT 'Edad del cliente',
     email VARCHAR(100) NOT NULL UNIQUE COMMENT 'Email único del cliente',
-    cod_tipo_cliente VARCHAR(10) NOT NULL COMMENT 'Código del tipo de cliente (FK)',
+    cod_tipo_cliente VARCHAR(10) NOT NULL COMMENT 'Código del tipo de cliente',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación del registro',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última actualización',
     
-    -- Índices para optimizar consultas
+    -- Índice principal por RUT
+    INDEX idx_cliente_rut (rut),
     INDEX idx_cliente_email (email),
-    INDEX idx_cliente_nombre_apellido (nombre, apellido),
-    INDEX idx_cliente_tipo (cod_tipo_cliente),
-    INDEX idx_cliente_edad (edad),
-    INDEX idx_cliente_created_at (created_at),
-    
-    -- Clave foránea
-    CONSTRAINT fk_cliente_tipo_cliente 
-        FOREIGN KEY (cod_tipo_cliente) 
-        REFERENCES tipo_cliente(codigo) 
-        ON UPDATE CASCADE 
-        ON DELETE RESTRICT,
     
     -- Restricciones de integridad
     CONSTRAINT chk_cliente_edad CHECK (edad >= 0 AND edad <= 150),
     CONSTRAINT chk_cliente_email_format CHECK (email REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'),
     CONSTRAINT chk_cliente_nombre_not_empty CHECK (TRIM(nombre) != ''),
-    CONSTRAINT chk_cliente_apellido_not_empty CHECK (TRIM(apellido) != '')
+    CONSTRAINT chk_cliente_apellido_not_empty CHECK (TRIM(apellido) != ''),
+    CONSTRAINT chk_cliente_rut_not_empty CHECK (TRIM(rut) != ''),
+    
+    -- Foreign Key
+    CONSTRAINT fk_cliente_tipo_cliente FOREIGN KEY (cod_tipo_cliente) REFERENCES tipo_cliente(codigo)
     
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci 
 COMMENT='Tabla principal de clientes';
+
+-- Insertar clientes con datos aleatorios (15 registros)
+INSERT INTO cliente (rut, nombre, apellido, edad, email, cod_tipo_cliente) VALUES
+('12345678-9', 'María', 'González', 28, 'maria.gonzalez@email.com', 'VIP'),
+('23456789-0', 'Carlos', 'Rodríguez', 35, 'carlos.rodriguez@empresa.com', 'CORPORATIVO'),
+('34567890-1', 'Ana', 'López', 22, 'ana.lopez@estudiante.edu', 'ESTUDIANTE'),
+('45678901-2', 'Miguel', 'Fernández', 42, 'miguel.fernandez@gmail.com', 'REGULAR'),
+('56789012-3', 'Laura', 'Martínez', 31, 'laura.martinez@hotmail.com', 'VIP'),
+('67890123-4', 'Diego', 'Sánchez', 26, 'diego.sanchez@yahoo.com', 'NUEVO'),
+('78901234-5', 'Carmen', 'Ruiz', 39, 'carmen.ruiz@outlook.com', 'REGULAR'),
+('89012345-6', 'Antonio', 'Morales', 45, 'antonio.morales@corporativo.com', 'CORPORATIVO'),
+('90123456-7', 'Elena', 'Jiménez', 20, 'elena.jimenez@universidad.edu', 'ESTUDIANTE'),
+('01234567-8', 'Roberto', 'Torres', 33, 'roberto.torres@ejemplo.com', 'REGULAR'),
+('11223344-5', 'Patricia', 'Vega', 67, 'patricia.vega@senior.com', 'SENIOR'),
+('22334455-6', 'Fernando', 'Castro', 29, 'fernando.castro@premium.com', 'PREMIUM'),
+('33445566-7', 'Isabel', 'Ramos', 24, 'isabel.ramos@nuevo.com', 'NUEVO'),
+('44556677-8', 'Javier', 'Herrera', 38, 'javier.herrera@vip.com', 'VIP'),
+('55667788-9', 'Sofía', 'Mendoza', 19, 'sofia.mendoza@estudiante.edu', 'ESTUDIANTE');
 
 -- Insertar tipos de cliente
 INSERT INTO tipo_cliente (codigo, descripcion) VALUES
@@ -73,24 +86,6 @@ INSERT INTO tipo_cliente (codigo, descripcion) VALUES
 ('ESTUDIANTE', 'Cliente Estudiante - Descuentos especiales para estudiantes'),
 ('SENIOR', 'Cliente Senior - Descuentos para adultos mayores'),
 ('PREMIUM', 'Cliente Premium - Servicios exclusivos');
-
--- Insertar clientes con datos aleatorios (15 registros)
-INSERT INTO cliente (nombre, apellido, edad, email, cod_tipo_cliente) VALUES
-('María', 'González', 28, 'maria.gonzalez@email.com', 'VIP'),
-('Carlos', 'Rodríguez', 35, 'carlos.rodriguez@empresa.com', 'CORPORATIVO'),
-('Ana', 'López', 22, 'ana.lopez@estudiante.edu', 'ESTUDIANTE'),
-('Miguel', 'Fernández', 42, 'miguel.fernandez@gmail.com', 'REGULAR'),
-('Laura', 'Martínez', 31, 'laura.martinez@hotmail.com', 'VIP'),
-('Diego', 'Sánchez', 26, 'diego.sanchez@yahoo.com', 'NUEVO'),
-('Carmen', 'Ruiz', 39, 'carmen.ruiz@outlook.com', 'REGULAR'),
-('Antonio', 'Morales', 45, 'antonio.morales@corporativo.com', 'CORPORATIVO'),
-('Elena', 'Jiménez', 20, 'elena.jimenez@universidad.edu', 'ESTUDIANTE'),
-('Roberto', 'Torres', 33, 'roberto.torres@ejemplo.com', 'REGULAR'),
-('Patricia', 'Vega', 67, 'patricia.vega@senior.com', 'SENIOR'),
-('Fernando', 'Castro', 29, 'fernando.castro@premium.com', 'PREMIUM'),
-('Isabel', 'Ramos', 24, 'isabel.ramos@nuevo.com', 'NUEVO'),
-('Javier', 'Herrera', 38, 'javier.herrera@vip.com', 'VIP'),
-('Sofía', 'Mendoza', 19, 'sofia.mendoza@estudiante.edu', 'ESTUDIANTE');
 
 -- Mostrar información de las tablas creadas
 SELECT 'ESTRUCTURA DE LA BASE DE DATOS' as info;
