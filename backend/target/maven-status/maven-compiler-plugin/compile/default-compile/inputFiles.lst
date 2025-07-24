@@ -2,9 +2,7 @@
 /home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/repository/TipoClienteRepository.java
 /home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/config/OpenApiConfig.java
 /home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/service/ClienteService.java
-/home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/mapper/ClienteMapper.java
 /home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/repository/ClienteRepository.java
-/home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/mapper/TipoClienteMapper.java
 /home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/exception/BusinessLogicException.java
 /home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/exception/GlobalExceptionHandler.java
 /home/jaguirre/develop/jobtest/workspace/clientes-api-crud/backend/src/main/java/com/example/clientesapi/entity/Cliente.java

@@ -16,5 +16,3 @@ com/example/clientesapi/exception/DuplicateResourceException.class
 com/example/clientesapi/ClientesApiApplication.class
 com/example/clientesapi/entity/Cliente.class
 com/example/clientesapi/exception/GlobalExceptionHandler$ErrorResponse.class
-com/example/clientesapi/mapper/ClienteMapper.class
-com/example/clientesapi/mapper/TipoClienteMapper.class
