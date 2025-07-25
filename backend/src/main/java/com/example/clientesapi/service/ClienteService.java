@@ -2,10 +2,13 @@ package com.example.clientesapi.service;
 
 import com.example.clientesapi.dto.ClienteDTO;
 import com.example.clientesapi.entity.Cliente;
+import com.example.clientesapi.entity.Telefono;
+import com.example.clientesapi.entity.TipoCliente;
 import com.example.clientesapi.exception.ResourceNotFoundException;
 import com.example.clientesapi.exception.DuplicateResourceException;
 import com.example.clientesapi.repository.ClienteRepository;
 import com.example.clientesapi.repository.TipoClienteRepository;
+import com.example.clientesapi.repository.TelefonoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,9 @@ public class ClienteService {
     
     @Autowired
     private TipoClienteRepository tipoClienteRepository;
+    
+    @Autowired
+    private TelefonoRepository telefonoRepository;
     
     @Transactional(readOnly = true)
     public List<ClienteDTO> findAll() {
@@ -57,11 +63,11 @@ public class ClienteService {
         }
         
         // 🎯 NUEVA VALIDACIÓN: Verificar que el código de tipo cliente exista
-        if (!tipoClienteRepository.existsById(clienteDTO.getCodTipoCliente())) {
-            throw new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + clienteDTO.getCodTipoCliente());
-        }
+        TipoCliente tipoCliente = tipoClienteRepository.findById(clienteDTO.getCodTipoCliente())
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + clienteDTO.getCodTipoCliente()));
         
         Cliente cliente = toEntity(clienteDTO);
+        cliente.setTipoCliente(tipoCliente);
         Cliente savedCliente = clienteRepository.save(cliente);
         return toDTO(savedCliente);
     }
@@ -81,11 +87,11 @@ public class ClienteService {
         }
         
         // 🎯 NUEVA VALIDACIÓN: Verificar que el código de tipo cliente exista
-        if (!tipoClienteRepository.existsById(clienteDTO.getCodTipoCliente())) {
-            throw new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + clienteDTO.getCodTipoCliente());
-        }
+        TipoCliente tipoCliente = tipoClienteRepository.findById(clienteDTO.getCodTipoCliente())
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + clienteDTO.getCodTipoCliente()));
         
         updateEntityFromDTO(clienteDTO, existingCliente);
+        existingCliente.setTipoCliente(tipoCliente);
         Cliente updatedCliente = clienteRepository.save(existingCliente);
         return toDTO(updatedCliente);
     }
@@ -99,6 +105,11 @@ public class ClienteService {
     
     // Métodos de conversión privados
     private ClienteDTO toDTO(Cliente entity) {
+        List<String> telefonos = entity.getTelefonos()
+                .stream()
+                .map(Telefono::getNumero)
+                .collect(Collectors.toList());
+                
         return new ClienteDTO(
             entity.getId(),
             entity.getRut(),
@@ -106,7 +117,8 @@ public class ClienteService {
             entity.getApellido(),
             entity.getEdad(),
             entity.getEmail(),
-            entity.getCodTipoCliente()
+            entity.getTipoCliente() != null ? entity.getTipoCliente().getCodigo() : null,
+            telefonos
         );
     }
     
@@ -118,7 +130,23 @@ public class ClienteService {
         cliente.setApellido(dto.getApellido());
         cliente.setEdad(dto.getEdad());
         cliente.setEmail(dto.getEmail());
-        cliente.setCodTipoCliente(dto.getCodTipoCliente());
+        // tipoCliente se establecerá en el método create/update
+        
+        // Crear teléfonos
+        if (dto.getTelefonos() != null && !dto.getTelefonos().isEmpty()) {
+            List<Telefono> telefonos = dto.getTelefonos().stream()
+                    .map(numero -> {
+                        Telefono telefono = new Telefono();
+                        telefono.setNumero(numero);
+                        telefono.setTipo("MOVIL"); // Tipo por defecto
+                        telefono.setPrincipal(false);
+                        telefono.setCliente(cliente);
+                        return telefono;
+                    })
+                    .collect(Collectors.toList());
+            cliente.setTelefonos(telefonos);
+        }
+        
         return cliente;
     }
     
@@ -128,7 +156,26 @@ public class ClienteService {
         entity.setApellido(dto.getApellido());
         entity.setEdad(dto.getEdad());
         entity.setEmail(dto.getEmail());
-        entity.setCodTipoCliente(dto.getCodTipoCliente());
+        // tipoCliente se establecerá en el método update
+        
+        // Actualizar teléfonos
+        if (dto.getTelefonos() != null) {
+            // Limpiar teléfonos existentes
+            entity.getTelefonos().clear();
+            
+            // Agregar nuevos teléfonos
+            List<Telefono> nuevosTelefonos = dto.getTelefonos().stream()
+                    .map(numero -> {
+                        Telefono telefono = new Telefono();
+                        telefono.setNumero(numero);
+                        telefono.setTipo("MOVIL"); // Tipo por defecto
+                        telefono.setPrincipal(false);
+                        telefono.setCliente(entity);
+                        return telefono;
+                    })
+                    .collect(Collectors.toList());
+            entity.getTelefonos().addAll(nuevosTelefonos);
+        }
     }
     
 }

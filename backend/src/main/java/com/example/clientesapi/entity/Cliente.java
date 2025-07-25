@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "cliente", 
@@ -47,13 +49,11 @@ public class Cliente {
     @Size(max = 100, message = "El email no puede tener más de 100 caracteres")
     private String email;
     
-    @Column(name = "cod_tipo_cliente", length = 10, nullable = false)
-    @NotBlank(message = "El código del tipo de cliente es obligatorio")
-    @Size(max = 10, message = "El código del tipo de cliente no puede tener más de 10 caracteres")
-    private String codTipoCliente;
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Telefono> telefonos = new ArrayList<>();
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cod_tipo_cliente", referencedColumnName = "codigo", insertable = false, updatable = false,
+    @JoinColumn(name = "cod_tipo_cliente", referencedColumnName = "codigo", nullable = false,
                 foreignKey = @ForeignKey(name = "fk_cliente_tipo_cliente"))
     private TipoCliente tipoCliente;
     
