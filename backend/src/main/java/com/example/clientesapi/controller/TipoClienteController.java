@@ -37,6 +37,7 @@ public class TipoClienteController {
     public ResponseEntity<List<TipoClienteDTO>> getAllTiposCliente() {
         log.info("GET /api/tipos-cliente - Obteniendo todos los tipos de cliente para catálogo");
         List<TipoClienteDTO> tipos = tipoClienteService.findAll();
+        log.info("Se encontraron {} tipos de cliente", tipos.size());
         return ResponseEntity.ok(tipos);
     }
     
@@ -56,6 +57,7 @@ public class TipoClienteController {
             @PathVariable String codigo) {
         log.info("GET /api/tipos-cliente/{} - Obteniendo tipo de cliente por código", codigo);
         TipoClienteDTO tipo = tipoClienteService.findById(codigo);
+        log.info("Tipo de cliente encontrado: {} - {}", tipo.getCodigo(), tipo.getDescripcion());
         return ResponseEntity.ok(tipo);
     }
     
