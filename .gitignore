@@ -1,12 +1,11 @@
 # Maven
-target/
+/backend/target/
 *.log
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+/backend/.mvn/timing.properties
+/backend/.mvn/wrapper/maven-wrapper.jar
+
+# Archivos generados por Angular y Node
+/frontend/dist
+/frontend/node_modules
+/frontend/.angular
+/frontend/.cache
