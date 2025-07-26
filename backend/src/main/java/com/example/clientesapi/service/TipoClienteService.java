@@ -25,6 +25,7 @@ public class TipoClienteService {
     public List<TipoClienteDTO> findAll() {
         log.info("Buscando todos los tipos de cliente");
         List<TipoCliente> tipos = tipoClienteRepository.findAll();
+        log.info("Se encontraron {} tipos de cliente", tipos.size());
         return tipos.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -35,6 +36,7 @@ public class TipoClienteService {
         log.info("Buscando tipo de cliente por código: {}", codigo);
         TipoCliente tipoCliente = tipoClienteRepository.findById(codigo)
                 .orElseThrow(() -> new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + codigo));
+        log.info("Tipo de cliente encontrado: {} - {}", tipoCliente.getCodigo(), tipoCliente.getDescripcion());
         return convertToDTO(tipoCliente);
     }
     
@@ -42,11 +44,13 @@ public class TipoClienteService {
         log.info("Creando nuevo tipo de cliente: {}", tipoClienteDTO.getCodigo());
         
         if (tipoClienteRepository.existsByCodigo(tipoClienteDTO.getCodigo())) {
+            log.warn("Intento de crear tipo de cliente con código duplicado: {}", tipoClienteDTO.getCodigo());
             throw new DuplicateResourceException("Ya existe un tipo de cliente con código: " + tipoClienteDTO.getCodigo());
         }
         
         TipoCliente tipoCliente = convertToEntity(tipoClienteDTO);
         TipoCliente savedTipoCliente = tipoClienteRepository.save(tipoCliente);
+        log.info("Tipo de cliente creado exitosamente: {} - {}", savedTipoCliente.getCodigo(), savedTipoCliente.getDescripcion());
         return convertToDTO(savedTipoCliente);
     }
     
@@ -59,6 +63,7 @@ public class TipoClienteService {
         existingTipoCliente.setDescripcion(tipoClienteDTO.getDescripcion());
         
         TipoCliente updatedTipoCliente = tipoClienteRepository.save(existingTipoCliente);
+        log.info("Tipo de cliente actualizado exitosamente: {} - {}", updatedTipoCliente.getCodigo(), updatedTipoCliente.getDescripcion());
         return convertToDTO(updatedTipoCliente);
     }
     
@@ -66,10 +71,12 @@ public class TipoClienteService {
         log.info("Eliminando tipo de cliente: {}", codigo);
         
         if (!tipoClienteRepository.existsById(codigo)) {
+            log.warn("Intento de eliminar tipo de cliente inexistente: {}", codigo);
             throw new ResourceNotFoundException("Tipo de cliente no encontrado con código: " + codigo);
         }
         
         tipoClienteRepository.deleteById(codigo);
+        log.info("Tipo de cliente eliminado exitosamente: {}", codigo);
     }
     
     // Métodos de conversión usando Lombok

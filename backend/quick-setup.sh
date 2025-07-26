@@ -28,21 +28,36 @@ docker rm mysql-clientes-api 2>/dev/null
 
 # Crear nuevo contenedor
 docker run --name mysql-clientes-api \
-  -e MYSQL_ROOT_PASSWORD= \
+  -e MYSQL_ROOT_PASSWORD=root123 \
   -e MYSQL_DATABASE=clientes_db \
   -p 3306:3306 -d mysql:8.0
 
 echo "2. Esperando que MySQL esté listo..."
-sleep 15
+# Esperar hasta que MySQL esté realmente disponible
+echo "Verificando conectividad con MySQL..."
+for i in {1..30}; do
+    if docker exec mysql-clientes-api mysql -uroot -proot123 -e "SELECT 1" >/dev/null 2>&1; then
+        echo "✅ MySQL está listo!"
+        break
+    fi
+    echo "⏳ Esperando MySQL... (intento $i/30)"
+    sleep 2
+done
+
+# Verificación final
+if ! docker exec mysql-clientes-api mysql -uroot -proot123 -e "SELECT 1" >/dev/null 2>&1; then
+    echo "❌ Error: MySQL no está respondiendo después de 60 segundos"
+    exit 1
+fi
 
 echo "3. Configurando base de datos..."
 # Ejecutar script de setup con manejo de errores
-if docker exec -i mysql-clientes-api mysql -uroot clientes_db < src/main/resources/db/setup-complete.sql; then
+if docker exec -i mysql-clientes-api mysql -uroot -proot123 clientes_db < src/main/resources/db/setup-complete.sql; then
     echo "   ✅ Base de datos configurada exitosamente"
 else
     echo "   ⚠️  Error configurando base de datos, reintentando..."
     sleep 5
-    docker exec -i mysql-clientes-api mysql -uroot clientes_db < src/main/resources/db/setup-complete.sql
+    docker exec -i mysql-clientes-api mysql -uroot -proot123 clientes_db < src/main/resources/db/setup-complete.sql
 fi
 
 echo "4. Compilando aplicación..."

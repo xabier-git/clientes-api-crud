@@ -4,14 +4,16 @@ Una API REST CRUD completa para la gestión de clientes desarrollada con Spring 
 
 ## Características
 
-- **CRUD completo** para clientes y tipos de cliente
-- **Relaciones JPA** con foreign keys entre Cliente y TipoCliente
+- **CRUD completo** para clientes con teléfonos integrados
+- **Relaciones JPA** con foreign keys entre Cliente ↔ TipoCliente y Cliente ↔ Telefono
+- **Gestión de teléfonos** múltiples por cliente con cascada automática
+- **TipoCliente como catálogo** de solo consulta para frontend
 - **Búsqueda por RUT** como identificador único secundario
 - **Validaciones de datos** con Bean Validation
 - **Solo JSON** en requests y responses
 - **Documentación API** con Swagger/OpenAPI 3
 - **Lombok** para reducir código boilerplate
-- **Índices optimizados** para búsquedas por RUT
+- **Índices optimizados** para búsquedas por RUT y teléfonos
 - **Manejo de errores** centralizado
 - **Docker MySQL** con datos de ejemplo
 
@@ -40,10 +42,20 @@ Una API REST CRUD completa para la gestión de clientes desarrollada con Spring 
 - `edad` (Integer): Edad del cliente
 - `email` (String, Unique): Email único
 - `codTipoCliente` (String, FK): Código del tipo de cliente
+- `telefonos` (List<String>): Lista de números de teléfono
 - `tipoCliente` (TipoCliente): Relación @ManyToOne con TipoCliente
+
+### Telefono
+- `id` (Long, PK): ID autoincremental
+- `numero` (String): Número de teléfono
+- `tipo` (String): Tipo de teléfono (MOVIL, FIJO, TRABAJO, etc.)
+- `principal` (Boolean): Indica si es el teléfono principal
+- `clienteId` (Long, FK): ID del cliente propietario
+- `cliente` (Cliente): Relación @ManyToOne con Cliente
 
 ### Relaciones
 - **Cliente** → **TipoCliente**: Relación Many-to-One con foreign key
+- **Cliente** → **Telefono**: Relación One-to-Many con cascada automática
 
 ## Configuración Rápida con Docker
 
@@ -135,17 +147,14 @@ Todos los endpoints solo aceptan y retornan JSON (`application/json`):
 - `GET /api/clientes` - Listar todos los clientes
 - `GET /api/clientes/{id}` - Obtener cliente por ID
 - `GET /api/clientes/rut/{rut}` - Obtener cliente por RUT
-- `POST /api/clientes` - Crear nuevo cliente
-- `PUT /api/clientes/{id}` - Actualizar cliente
-- `DELETE /api/clientes/{id}` - Eliminar cliente
+- `POST /api/clientes` - Crear nuevo cliente (con teléfonos)
+- `PUT /api/clientes/{id}` - Actualizar cliente (incluye teléfonos)
+- `DELETE /api/clientes/{id}` - Eliminar cliente (elimina teléfonos automáticamente)
 
-### Tipos de Cliente
+### Tipos de Cliente (Solo Consulta)
 
-- `GET /api/tipos-cliente` - Listar todos los tipos
+- `GET /api/tipos-cliente` - Listar todos los tipos (para catálogo/<select>)
 - `GET /api/tipos-cliente/{codigo}` - Obtener tipo por código
-- `POST /api/tipos-cliente` - Crear nuevo tipo
-- `PUT /api/tipos-cliente/{codigo}` - Actualizar tipo
-- `DELETE /api/tipos-cliente/{codigo}` - Eliminar tipo
 
 ## Datos de Ejemplo
 
@@ -161,7 +170,7 @@ El sistema viene con datos precargados:
 - **PREM**: Cliente Premium - Servicios exclusivos
 
 ### Clientes:
-10+ clientes de ejemplo con diferentes tipos
+10+ clientes de ejemplo con diferentes tipos y múltiples teléfonos por cliente
 
 ## Ejemplos de Uso
 
@@ -171,7 +180,23 @@ El sistema viene con datos precargados:
 curl http://localhost:8080/api/tipos-cliente
 ```
 
-### Crear un Cliente
+### Crear un Cliente con Teléfonos
+
+```bash
+curl -X POST http://localhost:8080/api/clientes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rut": "66666666-6",
+    "nombre": "Test",
+    "apellido": "Validacion",
+    "edad": 25,
+    "email": "test.validacion@email.com",
+    "codTipoCliente": "VIP",
+    "telefonos": ["941894939", "989549924"]
+  }'
+```
+
+### Crear un Cliente (sin teléfonos)
 
 ```bash
 curl -X POST http://localhost:8080/api/clientes \
@@ -186,21 +211,25 @@ curl -X POST http://localhost:8080/api/clientes \
   }'
 ```
 
-### Obtener Cliente por RUT
+### Obtener Cliente por RUT (incluye teléfonos)
 
 ```bash
 curl http://localhost:8080/api/clientes/rut/12345678-9
 ```
 
-### Crear Tipo de Cliente
+### Ver tipos disponibles para el <select> del frontend
 
 ```bash
-curl -X POST http://localhost:8080/api/tipos-cliente \
-  -H "Content-Type: application/json" \
-  -d '{
-    "codigo": "GOLD",
-    "descripcion": "Cliente Gold - Membresía dorada"
-  }'
+curl http://localhost:8080/api/tipos-cliente
+```
+
+### Crear Tipo de Cliente
+
+**Nota**: Los tipos de cliente son un catálogo estático. Para agregar nuevos tipos, modifica directamente la base de datos o los scripts SQL.
+
+```bash
+# Ver tipos disponibles para el <select> del frontend
+curl http://localhost:8080/api/tipos-cliente
 ```
 
 ### Actualizar un Cliente
@@ -214,7 +243,8 @@ curl -X PUT http://localhost:8080/api/clientes/1 \
     "apellido": "Pérez",
     "edad": 31,
     "email": "juan.perez@email.com",
-    "codTipoCliente": "PREM"
+    "codTipoCliente": "PREM",
+    "telefonos": ["912345678", "223456789", "987654321"]
   }'
 ```
 
@@ -232,16 +262,20 @@ curl -X DELETE http://localhost:8080/api/clientes/1
 - **Edad** debe estar entre 0 y 150 años
 - **Código de tipo cliente** es obligatorio y debe existir en tipo_cliente
 - **Código de tipo** debe ser único (máximo 10 caracteres)
+- **Teléfonos** deben tener formato válido (números, +, -, espacios)
+- **Tipo de teléfono** debe ser válido (MOVIL, FIJO, TRABAJO, EMERGENCIA, OTRO)
 
 ## Características Técnicas
 
 - **Índice principal por RUT** para búsquedas optimizadas
+- **Índices de teléfonos** por cliente y número para consultas rápidas
 - **Lombok** para getters, setters y constructores automáticos
 - **Solo JSON** en todas las comunicaciones
 - **Validación de datos** con anotaciones Bean Validation
 - **Manejo de errores** centralizado con ResponseEntity
 - **Documentación automática** con Swagger
 - **Relaciones JPA** con foreign keys entre entidades
+- **Cascada automática** para teléfonos (eliminación y actualización)
 - **Base de datos dockerizada** para fácil setup
 
 ## Estructura del Proyecto
@@ -258,9 +292,11 @@ src/
 │   │   │   └── TipoClienteService.java
 │   │   ├── repository/          # Acceso a datos JPA
 │   │   │   ├── ClienteRepository.java
+│   │   │   ├── TelefonoRepository.java
 │   │   │   └── TipoClienteRepository.java
 │   │   ├── entity/              # Entidades JPA con Lombok
 │   │   │   ├── Cliente.java
+│   │   │   ├── Telefono.java
 │   │   │   └── TipoCliente.java
 │   │   ├── dto/                 # DTOs con Lombok
 │   │   │   ├── ClienteDTO.java

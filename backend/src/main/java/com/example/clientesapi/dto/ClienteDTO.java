@@ -5,11 +5,12 @@ import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
+import java.util.ArrayList;
 
 @Schema(description = "DTO para crear/actualizar cliente")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class ClienteDTO {
     
     @Schema(description = "ID único del cliente (solo lectura)", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
@@ -45,5 +46,25 @@ public class ClienteDTO {
     @NotBlank(message = "El código del tipo de cliente es obligatorio")
     @Size(max = 10, message = "El código del tipo de cliente no puede tener más de 10 caracteres")
     private String codTipoCliente;
+    
+    @Schema(description = "Lista de teléfonos del cliente")
+    private List<String> telefonos = new ArrayList<>();
+    
+    // Constructor completo
+    public ClienteDTO(Long id, String rut, String nombre, String apellido, Integer edad, String email, String codTipoCliente, List<String> telefonos) {
+        this.id = id;
+        this.rut = rut;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.edad = edad;
+        this.email = email;
+        this.codTipoCliente = codTipoCliente;
+        this.telefonos = telefonos != null ? telefonos : new ArrayList<>();
+    }
+    
+    // Constructor sin teléfonos (para compatibilidad)
+    public ClienteDTO(Long id, String rut, String nombre, String apellido, Integer edad, String email, String codTipoCliente) {
+        this(id, rut, nombre, apellido, edad, email, codTipoCliente, new ArrayList<>());
+    }
     
 }
