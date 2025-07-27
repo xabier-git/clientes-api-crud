@@ -12,6 +12,7 @@ Una API REST CRUD completa para la gestión de clientes desarrollada con Spring 
 - **Validaciones de datos** con Bean Validation
 - **Solo JSON** en requests y responses
 - **Documentación API** con Swagger/OpenAPI 3
+- **CORS configurado** para frontend Angular y documentación Swagger
 - **Lombok** para reducir código boilerplate
 - **Índices optimizados** para búsquedas por RUT y teléfonos
 - **Manejo de errores** centralizado
@@ -89,11 +90,33 @@ docker exec -i mysql-clientes-api mysql -uroot clientes_db < src/main/resources/
 Verificar `application.properties` (ya configurado):
 
 ```properties
+# Base de datos
 spring.datasource.url=jdbc:mysql://localhost:3306/clientes_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 spring.datasource.username=root
-spring.datasource.password=
+spring.datasource.password=root123
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# CORS - Orígenes permitidos (configurables)
+app.cors.allowed-origins=http://localhost:4200,http://127.0.0.1:4200,http://localhost:8080
 ```
+
+### 4. Configuración CORS
+
+La aplicación incluye configuración CORS con **doble estrategia**:
+
+#### **API REST** (Restrictiva):
+- Solo permite orígenes configurados en `app.cors.allowed-origins`
+- Métodos: GET, POST, PUT, DELETE, OPTIONS
+- Aplica a: `/api/**`
+
+#### **Swagger UI** (Permisiva):
+- Permite cualquier origen para documentación
+- Todos los métodos HTTP
+- Aplica a: `/swagger-ui/**`, `/api-docs/**`
+
+**Archivos de configuración**:
+- `src/main/java/com/example/clientesapi/config/CorsConfig.java`
+- `application.properties` (property: `app.cors.allowed-origins`)
 
 ## Ejecutar la Aplicación
 
@@ -302,7 +325,9 @@ src/
 │   │   │   ├── ClienteDTO.java
 │   │   │   └── TipoClienteDTO.java
 │   │   ├── exception/           # Manejo de excepciones
-│   │   ├── config/              # OpenApiConfig - Configuración Swagger
+│   │   ├── config/              # Configuraciones Spring
+│   │   │   ├── CorsConfig.java      # Configuración CORS
+│   │   │   └── OpenApiConfig.java   # Configuración Swagger
 │   │   └── ClientesApiApplication.java
 │   └── resources/
 │       ├── db/                  # Scripts de base de datos

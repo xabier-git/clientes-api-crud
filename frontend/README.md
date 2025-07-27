@@ -152,22 +152,31 @@ ng generate component components/nuevo-componente --standalone
 ng generate service services/nuevo-servicio
 ```
 
-## Configuración de Proxy (Opcional)
+## Configuración de Proxy (Configurado)
 
-Para evitar problemas de CORS, puedes configurar un proxy:
+El proyecto ya incluye configuración de proxy para evitar problemas de CORS:
 
 ```json
-// proxy.conf.json
+// proxy.conf.json (ya configurado)
 {
-  "/api/*": {
+  "/api/**": {
     "target": "http://localhost:8080",
-    "secure": true,
-    "changeOrigin": true
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
   }
 }
 ```
 
-Luego ejecutar:
-```bash
-ng serve --proxy-config proxy.conf.json
-```
+**El comando `npm start` ya usa automáticamente esta configuración.**
+
+### Uso del Proxy:
+- **Frontend**: `http://localhost:4200`
+- **Peticiones API**: `/api/clientes` → `http://localhost:8080/api/clientes`
+- **Sin CORS**: El proxy maneja la comunicación con el backend
+
+### Backend CORS:
+El backend también tiene CORS configurado para permitir peticiones desde:
+- `http://localhost:4200`
+- `http://127.0.0.1:4200`
+- `http://localhost:8080`

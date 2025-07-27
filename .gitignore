@@ -1,4 +1,24 @@
 # ===========================================
+# IDE and Editor configurations
+# ===========================================
+
+# VS Code (global para todo el proyecto)
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.metadata
+.settings/
+.project
+.classpath
+
+# ===========================================
 # BACKEND - Spring Boot / Maven
 # ===========================================
 
@@ -16,6 +36,78 @@
 /backend/.settings
 /backend/.springBeans
 /backend/.sts4-cache
+
+# IntelliJ IDEA (backend específico)
+/backend/.idea
+/backend/*.iws
+/backend/*.iml
+/backend/*.ipr
+
+# NetBeans
+/backend/nbproject/private/
+/backend/nbbuild/
+/backend/dist/
+/backend/nbdist/
+/backend/.nb-gradle/
+/backend/build/
+
+# Logs
+*.log
+*.log.*
+/backend/logs/
+/backend/log/
+
+# Spring Boot
+/backend/spring-boot-*.log
+
+# Database
+/backend/*.db
+/backend/*.sqlite
+/backend/*.sqlite3
+
+# ===========================================
+# FRONTEND - Angular / Node.js
+# ===========================================
+
+# Dependencies
+/frontend/node_modules/
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# Compiled output
+/frontend/dist/
+/frontend/tmp/
+/frontend/out-tsc/
+
+# Angular specific
+/frontend/.angular/
+/frontend/.cache/
+
+# Coverage
+/frontend/coverage/
+
+# IDEs (frontend específico)
+/frontend/.idea/
+/frontend/.vscode/
+
+# ===========================================
+# GENERAL - Cross-platform
+# ===========================================
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Backup files
+*.bak
+*.backup
+*.swp
+*~
 
 
 # VS Code
