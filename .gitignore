@@ -1,11 +1,132 @@
+# ===========================================
+# BACKEND - Spring Boot / Maven
+# ===========================================
+
 # Maven
 /backend/target/
-*.log
 /backend/.mvn/timing.properties
 /backend/.mvn/wrapper/maven-wrapper.jar
+/backend/.mvn/wrapper/maven-wrapper.properties
 
-# Archivos generados por Angular y Node
-/frontend/dist
-/frontend/node_modules
-/frontend/.angular
-/frontend/.cache
+# STS (Spring Tool Suite)
+/backend/.apt_generated
+/backend/.classpath
+/backend/.factorypath
+/backend/.project
+/backend/.settings
+/backend/.springBeans
+/backend/.sts4-cache
+
+
+# VS Code
+/backend/.vscode/
+/backend/.github/
+.github/
+
+# IDEs and editors
+/frontend/.idea/
+/frontend/.vscode/
+
+
+# Logs
+*.log
+*.log.*
+/backend/logs/
+/backend/log/
+
+# Spring Boot
+/backend/spring-boot-*.log
+/backend/application-*.properties
+/backend/application-*.yml
+!/backend/application.properties
+!/backend/application.yml
+
+# Database
+/backend/*.db
+/backend/*.sqlite
+/backend/*.sqlite3
+/backend/h2/
+
+# Temporary files
+/backend/*.tmp
+/backend/*.temp
+
+# ===========================================
+# FRONTEND - Angular / Node.js
+# ===========================================
+
+# Dependencies
+/frontend/node_modules/
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+/frontend/pnpm-debug.log*
+
+/frontend/.github/
+
+# Compiled output
+/frontend/dist/
+/frontend/tmp/
+/frontend/out-tsc/
+/frontend/bazel-out/
+
+# Angular specific
+/frontend/.angular/
+/frontend/.cache/
+/frontend/.nx/cache
+
+
+
+# IDE - VSCode
+.vscode/
+/frontend/.vscode/*
+#!/frontend/.vscode/settings.json
+#!/frontend/.vscode/tasks.json
+#!/frontend/.vscode/launch.json
+#!/frontend/.vscode/extensions.json
+/frontend/.history/*
+
+# System files
+/frontend/.DS_Store
+/frontend/Thumbs.db
+
+# Angular CLI cache
+/frontend/.angular/cache
+
+
+# ===========================================
+# GENERAL - Cross-platform
+# ===========================================
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables
+#.env
+#.env.local
+#.env.development.local
+#.env.test.local
+#.env.production.local
+
+# Backup files
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+
+# Archives
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
